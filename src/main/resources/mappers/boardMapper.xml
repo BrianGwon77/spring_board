@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.spring.mappers.BoardMapper">
+    <select id="getCount" resultType="int" parameterType="integer">
+        SELECT
+            COUNT(*)
+        FROM SPRING_POST
+        WHERE 1=1
+        AND BOARD_NO = #{board_no}
+        AND DELETE_FLG = 'N'
+    </select>
+
+    <select id="getPost" resultType="com.example.spring.dto.PostDto" parameterType="integer">
+        SELECT BOARD_NO
+             , POST_NO
+             , TITLE
+             , CONTENT
+             , INSRT_USR
+             , INSRT_DT
+             , UPDT_USR
+             , UPDT_DT
+        FROM SPRING_POST
+        WHERE DELETE_FLG = 'N'
+        AND POST_NO = #{post_no}
+    </select>
+
+    <select id="getPostList" resultType="com.example.spring.dto.PostDto" parameterType="Map">
+        SELECT BOARD_NO
+             , POST_NO
+             , TITLE
+             , CONTENT
+             , INSRT_USR
+             , INSRT_DT
+             , UPDT_USR
+             , UPDT_DT
+        FROM (
+                 SELECT ROW_NUMBER() over ( ORDER BY POST_NO ) AS ROW_NUM
+                      , *
+                 FROM SPRING_POST
+                 WHERE 1 = 1
+                 AND BOARD_NO = #{board_no}
+                 AND TITLE LIKE '%' + #{keyword} + '%'
+                 AND DELETE_FLG = 'N'
+             ) A
+        WHERE ROW_NUM BETWEEN (#{page_no}-1)*#{per_page} + 1 AND #{page_no}*#{per_page}
+    </select>
+
+</mapper>
