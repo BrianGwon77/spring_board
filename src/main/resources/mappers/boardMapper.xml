@@ -48,4 +48,34 @@
         WHERE ROW_NUM BETWEEN (#{page_no}-1)*#{per_page} + 1 AND #{page_no}*#{per_page}
     </select>
 
+    <select id="getData" resultType="com.example.spring.dto.PostDto" parameterType="Map">
+        SELECT BOARD_NO
+             , POST_NO
+             , TITLE
+             , CONTENT
+             , INSRT_USR
+             , INSRT_DT
+             , UPDT_USR
+             , UPDT_DT
+        FROM (
+                 SELECT ROW_NUMBER() over ( ORDER BY POST_NO ) AS ROW_NUM
+                      , *
+                 FROM SPRING_POST
+                 WHERE 1 = 1
+                   AND BOARD_NO = #{board_no}
+                   AND TITLE LIKE '%' + #{keyword} + '%'
+                   AND DELETE_FLG = 'N'
+             ) A
+        WHERE ROW_NUM BETWEEN (#{page_no}-1)*#{per_page} + 1 AND #{page_no}*#{per_page}
+    </select>
+
+    <select id="test" resultType="int" parameterType="com.example.spring.dto.OrderDto">
+        <if test="'orderDto == null">
+            select count(*) from spring_board
+        </if>
+        <if test ='orderDto != null'>
+            select count(*) from spring_post
+        </if>
+    </select>
+
 </mapper>

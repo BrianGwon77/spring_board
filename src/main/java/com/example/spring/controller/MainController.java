@@ -1,5 +1,6 @@
 package com.example.spring.controller;
 
+import com.example.spring.dto.OrderDto;
 import com.example.spring.dto.PostDto;
 import com.example.spring.service.BoardService;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,12 @@ public class MainController {
         PostDto postDto = boardService.getPost(post_no);
         model.addAttribute("postDto", postDto);
         return "/board/post";
+    }
+
+    @PostMapping("/test")
+    public void getPost(@RequestBody List<OrderDto> orderDtoList) {
+        int val = boardService.test(orderDtoList);
+        System.out.println("test...");
     }
 
 }
