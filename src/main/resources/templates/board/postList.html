@@ -31,6 +31,16 @@
 
 <body>
 <div class="search-bar">
+    <select name="select-sort-standard" id="select-sort-standard">
+        <option value="post_no" selected>Post No.</option>
+        <option value="title">Title</option>
+        <option value="creator">Creator</option>
+        <option value="created_dt">Created DT</option>
+    </select>
+    <select name="select-sort-way" id="select-sort-way" style="margin-left: 10px; margin-right: 10px;">
+        <option value="asc" selected>오름차순</option>
+        <option value="desc">내림차순</option>
+    </select>
     <select name="per_page" id="select-per_page">
         <option value="5" selected>5</option>
         <option value="10">10</option>
@@ -63,8 +73,32 @@
 
 <script>
 
+    /** 전역변수 선언 **/
+    let current_page = 1;
+    let current_slot = 1;
+    let per_page = 5;
+    let per_slot = 5;
+    let keyword = "";
+    let sort_standard = {};
+    let totalCount = 0;
+
+    function sort_update(){
+        sort_standard = { 'column': $('#select-sort-standard :selected').val() ,
+            'order' : $('#select-sort-way :selected').val()};
+    }
+
     $('#search-input').change(function () {
-        post_update();
+        transfer_page(current_page);
+    })
+
+    $('#select-sort-way').change(function () {
+        sort_update();
+        transfer_page(current_page);
+    })
+
+    $('#select-sort-standard').change(function () {
+        sort_update();
+        transfer_page(current_page);
     })
 
     $('#select-per_page').change(function () {
@@ -72,21 +106,19 @@
         transfer_page(current_page);
     })
 
-    /** 전역변수 선언 **/
-    let current_page = 1;
-    let current_slot = 1;
-    let per_page = 5;
-    let per_slot = 5;
-    let keyword = "";
-
     $(document).ready(function() {
+        sort_standard = { 'column': $('#select-sort-standard :selected').val() ,
+            'order' : $('#select-sort-way :selected').val()};
         transfer_page(current_page);
     });
 
     /** 페이지 이동 함수 **/
     function transfer_page(to_page) {
 
-        let last_page =  Math.ceil([[${totalCount}]] / per_page);
+        /** 포스트 업데이트 **/
+        post_update();
+
+        let last_page =  Math.ceil(totalCount / per_page);
         if (to_page > last_page || to_page < 1) return;
 
         current_page = to_page;
@@ -100,9 +132,6 @@
             $('#pageTable > tbody > tr').append('<td><button id="' + i + '"' + ' onclick="transfer_page(' + i + ')">' + i + '</button></td>');
         }
         $('#pageTable > tbody').append('</tr>');
-
-        /** 포스트 업데이트 **/
-        post_update();
 
     }
 
@@ -123,6 +152,7 @@
             per_page: per_page,
             page_no: current_page,
             keyword: keyword,
+            orderDto: sort_standard,
         };
 
        $.ajax({
@@ -135,13 +165,14 @@
                $('#boardTable > tbody > tr').remove();
                for (let i=0; i<result.length; i++) {
                    $('#boardTable > tbody').append('<tr onclick='
-                       + '"redirect_page(' + parseInt(result[i].post_no) + ')">'
-                       + '<td>' + result[i].post_no + '</td>'
-                       + '<td>' + result[i].title + '</td>'
-                       + '<td>' + result[i].insrt_usr + '</td>'
-                       + '<td>' + result[i].insrt_dt + '</td>'
+                       + '"redirect_page(' + parseInt(result.postDtoList[i].post_no) + ')">'
+                       + '<td>' + result.postDtoList[i].post_no + '</td>'
+                       + '<td>' + result.postDtoList[i].title + '</td>'
+                       + '<td>' + result.postDtoList[i].insrt_usr + '</td>'
+                       + '<td>' + result.postDtoList[i].insrt_dt + '</td>'
                        + '</tr>');
                }
+               totalCount = result.totalCount;
            }
            });
     }

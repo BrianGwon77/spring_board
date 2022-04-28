@@ -2,6 +2,7 @@ package com.example.spring.controller;
 
 import com.example.spring.dto.OrderDto;
 import com.example.spring.dto.PostDto;
+import com.example.spring.dto.PostListDto;
 import com.example.spring.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -21,23 +22,18 @@ public class MainController {
 
     @GetMapping("/post/list")
     public String getPostList(int board_no, int page_no, int per_page, Model model) {
+        /** 전체 데이터 수 **/
         int totalCount = boardService.getCount(board_no);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("board_no", board_no);
-        map.put("page_no", page_no);
-        map.put("per_page", per_page);
-        map.put("keyword", "");
-        List<PostDto> postDtoList = boardService.getPostList(map);
         model.addAttribute("totalCount", totalCount);
-        model.addAttribute("postDtoList", postDtoList);
         return "/board/postList";
     }
 
     @PostMapping("/post/list")
     @ResponseBody
-    public List<PostDto> getPostListAjax(@RequestBody Map<String, Object> parameter) {
+    public PostListDto getPostListAjax(@RequestBody Map<String, Object> parameter) {
+        List<PostDto> postDtoList =  boardService.getPostList(parameter);
         int totalCount = boardService.getCount(Integer.valueOf(parameter.get("board_no").toString()));
-        return boardService.getPostList(parameter);
+        return new PostListDto(totalCount, postDtoList);
     }
 
     @GetMapping("/post/{post_no}")
@@ -46,11 +42,4 @@ public class MainController {
         model.addAttribute("postDto", postDto);
         return "/board/post";
     }
-
-    @PostMapping("/test")
-    public void getPost(@RequestBody List<OrderDto> orderDtoList) {
-        int val = boardService.test(orderDtoList);
-        System.out.println("test...");
-    }
-
 }
